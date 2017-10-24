@@ -78,6 +78,9 @@
     currentPage.appDelegate = appDelegate;
     nextPage.appDelegate = appDelegate;
     previousPage.appDelegate = appDelegate;
+    currentPage.view.translatesAutoresizingMaskIntoConstraints = NO;
+    nextPage.view.translatesAutoresizingMaskIntoConstraints = NO;
+    previousPage.view.translatesAutoresizingMaskIntoConstraints = NO;
     currentPage.view.frame = self.scrollView.frame;
     nextPage.view.frame = self.scrollView.frame;
     previousPage.view.frame = self.scrollView.frame;
@@ -87,6 +90,86 @@
 	[self.scrollView addSubview:currentPage.view];
 	[self.scrollView addSubview:nextPage.view];
     [self.scrollView addSubview:previousPage.view];
+    
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:currentPage.view
+                                                                attribute:NSLayoutAttributeTop
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeTop
+                                                               multiplier:1.0 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:nextPage.view
+                                                                attribute:NSLayoutAttributeTop
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeTop
+                                                               multiplier:1.0 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:previousPage.view
+                                                                attribute:NSLayoutAttributeTop
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeTop
+                                                               multiplier:1.0 constant:0]];
+    
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:currentPage.view
+                                                                attribute:NSLayoutAttributeHeight
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeHeight
+                                                               multiplier:1.0 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:nextPage.view
+                                                                attribute:NSLayoutAttributeHeight
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeHeight
+                                                               multiplier:1.0 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:previousPage.view
+                                                                attribute:NSLayoutAttributeHeight
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeHeight
+                                                               multiplier:1.0 constant:0]];
+    
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:currentPage.view
+                                                                attribute:NSLayoutAttributeWidth
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeWidth
+                                                               multiplier:1.0 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:nextPage.view
+                                                                attribute:NSLayoutAttributeWidth
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeWidth
+                                                               multiplier:1.0 constant:0]];
+    [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:previousPage.view
+                                                                attribute:NSLayoutAttributeWidth
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                   toItem:self.scrollView
+                                                                attribute:NSLayoutAttributeWidth
+                                                               multiplier:1.0 constant:0]];
+    
+    currentLeading = [NSLayoutConstraint constraintWithItem:currentPage.view
+                                                  attribute:NSLayoutAttributeLeading
+                                                  relatedBy:NSLayoutRelationEqual
+                                                     toItem:self.scrollView
+                                                  attribute:NSLayoutAttributeLeading
+                                                 multiplier:1.0 constant:0];
+    [self.scrollView addConstraint:currentLeading];
+    nextLeading = [NSLayoutConstraint constraintWithItem:nextPage.view
+                                                  attribute:NSLayoutAttributeLeading
+                                                  relatedBy:NSLayoutRelationEqual
+                                                     toItem:self.scrollView
+                                                  attribute:NSLayoutAttributeLeading
+                                              multiplier:1.0 constant:0];
+    [self.scrollView addConstraint:nextLeading];
+    previousLeading = [NSLayoutConstraint constraintWithItem:previousPage.view
+                                                  attribute:NSLayoutAttributeLeading
+                                                  relatedBy:NSLayoutRelationEqual
+                                                     toItem:self.scrollView
+                                                  attribute:NSLayoutAttributeLeading
+                                                  multiplier:1.0 constant:0];
+    [self.scrollView addConstraint:previousLeading];
+    
     [self addChildViewController:currentPage];
     [self addChildViewController:nextPage];
     [self addChildViewController:previousPage];
@@ -521,10 +604,7 @@
 }
 
 - (void)resizeScrollView {
-    NSInteger widthCount = appDelegate.storiesCollection.storyLocationsCount;
-	if (widthCount == 0) {
-		widthCount = 1;
-	}
+    NSInteger widthCount = MAX(1, appDelegate.storiesCollection.storyLocationsCount);
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width
                                              * widthCount,
                                              self.scrollView.bounds.size.height);
@@ -601,21 +681,28 @@
 	NSInteger pageCount = [[appDelegate.storiesCollection activeFeedStoryLocations] count];
 	BOOL outOfBounds = newIndex >= pageCount || newIndex < 0;
     
-	if (!outOfBounds) {
-        CGRect pageFrame = pageController.view.bounds;
-		pageFrame.origin.y = 0;
-		pageFrame.origin.x = CGRectGetWidth(self.view.bounds) * newIndex;
-        pageFrame.size.height = CGRectGetHeight(self.view.bounds) - self.bottomSizeHeightConstraint.constant;
+    NSLayoutConstraint *constraint;
+    if (pageController == currentPage) constraint = currentLeading;
+    else if (pageController == nextPage) constraint = nextLeading;
+    else if (pageController == previousPage) constraint = previousLeading;
+
+    if (!outOfBounds) {
+//        CGRect pageFrame = pageController.view.bounds;
+//        pageFrame.origin.y = 0;
+//        pageFrame.origin.x = CGRectGetWidth(self.scrollView.bounds) * newIndex;
+        constraint.constant = CGRectGetWidth(self.scrollView.bounds) * newIndex;
+//        pageFrame.size.height = CGRectGetHeight(self.view.bounds) - self.bottomSizeHeightConstraint.constant;
         pageController.view.hidden = NO;
-		pageController.view.frame = pageFrame;
+//        pageController.view.frame = pageFrame;
 	} else {
 //        NSLog(@"Out of bounds: was %d, now %d", pageController.pageIndex, newIndex);
-		CGRect pageFrame = pageController.view.bounds;
-		pageFrame.origin.x = CGRectGetWidth(self.view.bounds) * newIndex;
-		pageFrame.origin.y = CGRectGetHeight(self.view.bounds);
-        pageFrame.size.height = CGRectGetHeight(self.view.bounds) - self.bottomSizeHeightConstraint.constant;
+//        CGRect pageFrame = pageController.view.bounds;
+//        pageFrame.origin.x = CGRectGetWidth(self.scrollView.bounds) * newIndex;
+//        pageFrame.origin.y = CGRectGetHeight(self.view.bounds);
+//        pageFrame.size.height = CGRectGetHeight(self.view.bounds) - self.bottomSizeHeightConstraint.constant;
+        constraint.constant = CGRectGetWidth(self.scrollView.bounds) * newIndex;
         pageController.view.hidden = YES;
-		pageController.view.frame = pageFrame;
+//        pageController.view.frame = pageFrame;
 	}
 //    NSLog(@"---> Story page control orient page: %@ (%d-%d)", NSStringFromCGRect(self.view.bounds), pageController.pageIndex, suppressRedraw);
 

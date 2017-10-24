@@ -71,7 +71,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.view.translatesAutoresizingMaskIntoConstraints = NO;
     
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
     [audioSession setCategory:AVAudioSessionCategoryPlayback
@@ -266,12 +266,12 @@
     [super viewDidAppear:animated];
     
     // Fix the position and size; can probably remove this once all views use auto layout
-    CGRect viewFrame = self.view.frame;
-    CGSize superSize = self.view.superview.bounds.size;
-    
-    if (viewFrame.size.height > superSize.height) {
-        self.view.frame = CGRectMake(viewFrame.origin.x, viewFrame.origin.y, viewFrame.size.width, superSize.height);
-    }
+//    CGRect viewFrame = self.view.frame;
+//    CGSize superSize = self.view.superview.bounds.size;
+//
+//    if (viewFrame.size.height > superSize.height) {
+//        self.view.frame = CGRectMake(viewFrame.origin.x, viewFrame.origin.y, viewFrame.size.width, superSize.height);
+//    }
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {

@@ -25,6 +25,10 @@
     UIView *progressView;
     UIView *progressViewContainer;
     
+    NSLayoutConstraint *currentLeading;
+    NSLayoutConstraint *nextLeading;
+    NSLayoutConstraint *previousLeading;
+    
     BOOL isDraggingScrollview;
     BOOL isAnimatedIntoPlace;
     BOOL inRotation;
